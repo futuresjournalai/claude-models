@@ -1,12 +1,14 @@
-
-**models.json contains ONLY:**
-```json
 {
   "models": [
     {
+      "id": "claude-opus-4-8",
+      "name": "Opus 4.8",
+      "desc": "Most capable (slower, higher cost)"
+    },
+    {
       "id": "claude-opus-4-7",
       "name": "Opus 4.7",
-      "desc": "Most capable (slower, higher cost)"
+      "desc": "Previous-gen flagship"
     },
     {
       "id": "claude-sonnet-4-6",
