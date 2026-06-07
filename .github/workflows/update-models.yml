@@ -53,23 +53,46 @@ jobs:
                   name = name[len('claude '):]
               return name
 
-          # Only keep current-generation Claude models (id starts with "claude-")
-          # and skip any clearly-deprecated/legacy entries if the API marks them.
-          models = []
+          def tier_of(model_id):
+              lower = model_id.lower()
+              if 'opus' in lower:
+                  return 'opus'
+              if 'sonnet' in lower:
+                  return 'sonnet'
+              if 'haiku' in lower:
+                  return 'haiku'
+              return None
+
+          # Collect all current Claude models, grouped by tier (opus/sonnet/haiku).
+          by_tier = {}
           for m in raw.get('data', raw.get('models', [])):
               model_id = m.get('id') or m.get('model')
               if not model_id or not model_id.startswith('claude-'):
                   continue
+              tier = tier_of(model_id)
+              if tier is None:
+                  continue
               display_name = m.get('display_name') or m.get('name') or model_id
-              models.append({
+              entry = {
                   'id': model_id,
                   'name': short_name(model_id, display_name),
                   'desc': desc_for(model_id, display_name),
                   '_created_at': m.get('created_at', ''),
-              })
+              }
+              by_tier.setdefault(tier, []).append(entry)
 
-          # Sort newest-first by created_at when available, falling back to id.
-          models.sort(key=lambda m: (m['_created_at'], m['id']), reverse=True)
+          # Keep only the newest model in each tier — this is what keeps the
+          # dropdown small and always-current instead of accumulating every
+          # legacy model Anthropic has ever shipped.
+          tier_order = ['opus', 'sonnet', 'haiku']
+          models = []
+          for tier in tier_order:
+              entries = by_tier.get(tier, [])
+              if not entries:
+                  continue
+              entries.sort(key=lambda e: (e['_created_at'], e['id']), reverse=True)
+              models.append(entries[0])
+
           for m in models:
               m.pop('_created_at', None)
 
