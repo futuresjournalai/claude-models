@@ -8,7 +8,7 @@
     {
       "id": "claude-opus-4-7",
       "name": "Opus 4.7",
-      "desc": "Previous-gen flagship"
+      "desc": "Most capable (slower, higher cost)"
     },
     {
       "id": "claude-sonnet-4-6",
@@ -16,9 +16,39 @@
       "desc": "Balanced (recommended)"
     },
     {
+      "id": "claude-opus-4-6",
+      "name": "Opus 4.6",
+      "desc": "Most capable (slower, higher cost)"
+    },
+    {
+      "id": "claude-opus-4-5-20251101",
+      "name": "Opus 4.5",
+      "desc": "Most capable (slower, higher cost)"
+    },
+    {
       "id": "claude-haiku-4-5-20251001",
       "name": "Haiku 4.5",
       "desc": "Fast & cheap (lower quality)"
+    },
+    {
+      "id": "claude-sonnet-4-5-20250929",
+      "name": "Sonnet 4.5",
+      "desc": "Balanced (recommended)"
+    },
+    {
+      "id": "claude-opus-4-1-20250805",
+      "name": "Opus 4.1",
+      "desc": "Most capable (slower, higher cost)"
+    },
+    {
+      "id": "claude-sonnet-4-20250514",
+      "name": "Sonnet 4",
+      "desc": "Balanced (recommended)"
+    },
+    {
+      "id": "claude-opus-4-20250514",
+      "name": "Opus 4",
+      "desc": "Most capable (slower, higher cost)"
     }
   ]
 }
