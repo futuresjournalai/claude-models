@@ -1,0 +1,97 @@
+name: Update Claude Models List
+
+on:
+  schedule:
+    # Runs every Monday at 13:00 UTC
+    - cron: '0 13 * * 1'
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+jobs:
+  update-models:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Fetch latest models from Anthropic API
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: |
+          set -e
+          curl -sS https://api.anthropic.com/v1/models \
+            -H "x-api-key: $ANTHROPIC_API_KEY" \
+            -H "anthropic-version: 2023-06-01" \
+            -o raw_models.json
+          cat raw_models.json
+
+      - name: Build models.json
+        run: |
+          python3 - <<'PYEOF'
+          import json
+
+          with open('raw_models.json') as f:
+              raw = json.load(f)
+
+          def desc_for(model_id, display_name):
+              lower = model_id.lower()
+              if 'opus' in lower:
+                  return 'Most capable (slower, higher cost)'
+              if 'sonnet' in lower:
+                  return 'Balanced (recommended)'
+              if 'haiku' in lower:
+                  return 'Fast & cheap (lower quality)'
+              return display_name
+
+          def short_name(model_id, display_name):
+              # Prefer the API's display_name, but trim the "Claude " prefix
+              # so it matches the existing "Opus 4.8" / "Sonnet 4.6" style.
+              name = display_name or model_id
+              if name.lower().startswith('claude '):
+                  name = name[len('claude '):]
+              return name
+
+          # Only keep current-generation Claude models (id starts with "claude-")
+          # and skip any clearly-deprecated/legacy entries if the API marks them.
+          models = []
+          for m in raw.get('data', raw.get('models', [])):
+              model_id = m.get('id') or m.get('model')
+              if not model_id or not model_id.startswith('claude-'):
+                  continue
+              display_name = m.get('display_name') or m.get('name') or model_id
+              models.append({
+                  'id': model_id,
+                  'name': short_name(model_id, display_name),
+                  'desc': desc_for(model_id, display_name),
+                  '_created_at': m.get('created_at', ''),
+              })
+
+          # Sort newest-first by created_at when available, falling back to id.
+          models.sort(key=lambda m: (m['_created_at'], m['id']), reverse=True)
+          for m in models:
+              m.pop('_created_at', None)
+
+          with open('models.json', 'w') as f:
+              json.dump({'models': models}, f, indent=2)
+              f.write('\n')
+
+          print(json.dumps({'models': models}, indent=2))
+          PYEOF
+
+      - name: Commit and push if changed
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          if git diff --quiet -- models.json; then
+            echo "No changes to models.json — already up to date."
+          else
+            git add models.json
+            git commit -m "Auto-update Claude models list"
+            git push
+          fi
+
+      - name: Clean up temp file
+        if: always()
+        run: rm -f raw_models.json
