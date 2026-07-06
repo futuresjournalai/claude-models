@@ -6,8 +6,8 @@
       "desc": "Most capable (slower, higher cost)"
     },
     {
-      "id": "claude-sonnet-4-6",
-      "name": "Sonnet 4.6",
+      "id": "claude-sonnet-5",
+      "name": "Sonnet 5",
       "desc": "Balanced (recommended)"
     },
     {
