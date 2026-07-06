@@ -3,7 +3,7 @@ name: Update Claude Models List
 on:
   schedule:
     # Runs every Monday at 13:00 UTC
-    - cron: '0 13 * * 1'
+    - cron: '0 13 * * *'
   workflow_dispatch: {}
 
 permissions:
