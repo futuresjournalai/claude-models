@@ -1,8 +1,8 @@
 {
   "models": [
     {
-      "id": "claude-opus-5",
-      "name": "Opus 5",
+      "id": "claude-opus-5-5",
+      "name": "Opus 5.5",
       "desc": "Most capable (slower, higher cost)"
     },
     {
